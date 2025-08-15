@@ -59,5 +59,5 @@ func main() {
 		return controller.NotFound(c)
 	})
 
-	app.Listen(":" + PORT)
+	app.Listen("0.0.0.0:" + PORT)
 }
