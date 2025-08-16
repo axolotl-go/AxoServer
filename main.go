@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/axolotl-go/axo-pages-server/controller"
@@ -14,7 +15,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		panic(err)
+		log.Println("Error loading .env file :", err)
 	}
 
 	PORT := "3000"
