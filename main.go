@@ -57,12 +57,7 @@ func main() {
 
 	app.Post("/login", routes.LoginUser)
 
-	app.Post("/logout", func(c *fiber.Ctx) error {
-		c.ClearCookie("token")
-		return c.JSON(fiber.Map{
-			"message": "Logged out successfully",
-		})
-	})
+	app.Post("/logout", controller.LogOut)
 
 	app.Get("/profile", middleware.Protected(), func(c *fiber.Ctx) error {
 		user := c.Locals("user")

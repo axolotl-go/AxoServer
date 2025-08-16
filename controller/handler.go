@@ -37,3 +37,10 @@ func Uploader(c *fiber.Ctx) error {
 	})
 
 }
+
+func LogOut(c *fiber.Ctx) error {
+	c.ClearCookie("token")
+	return c.JSON(fiber.Map{
+		"message": "Logged out successfully",
+	})
+}
