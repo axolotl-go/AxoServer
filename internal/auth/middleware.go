@@ -1,9 +1,8 @@
-package middleware
+package auth
 
 import (
 	"strings"
 
-	"github.com/axolotl-go/axo-pages-server/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,14 +25,13 @@ func Protected() fiber.Handler {
 			})
 		}
 
-		claims, err := utils.ParseJWT(token)
+		claims, err := ParseJWT(token)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Unauthorized",
 			})
 		}
 
-		// Guardamos info del usuario en c.Locals()
 		c.Locals("user", claims)
 
 		return c.Next()

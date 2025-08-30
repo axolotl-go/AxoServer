@@ -1,14 +1,14 @@
-package routes
+package user
 
 import (
-	"github.com/axolotl-go/axo-pages-server/db"
-	"github.com/axolotl-go/axo-pages-server/model"
-	"github.com/axolotl-go/axo-pages-server/utils"
+	"github.com/axolotl-go/axo-pages-server/internal/auth"
+	"github.com/axolotl-go/axo-pages-server/internal/db"
+	"github.com/axolotl-go/axo-pages-server/internal/hash"
 	"github.com/gofiber/fiber/v2"
 )
 
 func CreateUser(c *fiber.Ctx) error {
-	var user model.User
+	var user User
 
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -16,7 +16,13 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	hashedPassword, err := utils.Hash(user.Password)
+	if user.Username == "" || user.Email == "" || user.Password == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Missing required fields",
+		})
+	}
+
+	hashedPassword, err := hash.Hash(user.Password)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -40,8 +46,8 @@ func CreateUser(c *fiber.Ctx) error {
 }
 
 func LoginUser(c *fiber.Ctx) error {
-	var user model.User
-	var login model.Login
+	var user User
+	var login Login
 
 	if err := c.BodyParser(&login); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -55,13 +61,13 @@ func LoginUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if !utils.CompareHash(user.Password, login.Password) {
+	if !hash.CompareHash(user.Password, login.Password) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Invalid username or password",
 		})
 	}
 
-	token, err := utils.GenerateJWT(user.ID, user.Username)
+	token, err := auth.GenerateJWT(user.ID, user.Username)
 	if err != nil {
 		return err
 	}
@@ -80,4 +86,11 @@ func LoginUser(c *fiber.Ctx) error {
 			"token": token,
 		},
 	)
+}
+
+func LogOut(c *fiber.Ctx) error {
+	c.ClearCookie("token")
+	return c.JSON(fiber.Map{
+		"message": "Logged out successfully",
+	})
 }
